@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BhashaLite: AI-Powered Language Converter Prototype</title>
+    <!-- Tailwind CSS CDN for modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter for clean typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles to override or enhance Tailwind defaults */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar for chat area for better aesthetics */
+        .chat-area::-webkit-scrollbar {
+            width: 8px;
+        }
+        .chat-area::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        .chat-area::-webkit-scrollbar-thumb {
+            background: #cbd5e1; /* Tailwind gray-300 */
+            border-radius: 10px;
+        }
+        .chat-area::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; /* Tailwind gray-400 */
+        }
+        /* Styling for chat messages */
+        .chat-message.user {
+            background-color: #d1e7dd; /* Light green for user messages */
+            text-align: right;
+            margin-left: auto; /* Push to right */
+            margin-right: 0;
+        }
+        .chat-message.translated {
+            background-color: #cfe2ff; /* Light blue for translated messages */
+            text-align: left;
+            margin-left: 0;
+            margin-right: auto; /* Push to left */
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8">
+    <div class="container bg-white p-6 sm:p-8 rounded-2xl shadow-xl w-full max-w-4xl border border-gray-100">
+        <h1 class="text-3xl sm:text-4xl font-bold text-center text-gray-800 mb-6 lg:mb-8">
+            BhashaLite: AI-Powered Language Converter Prototype
+        </h1>
+        <!-- Text Translation Engine Section -->
+        <h2 class="text-2xl font-semibold text-gray-700 mb-4 pb-2 border-b border-gray-200">
+            1. Text Translation Engine (Core Feature)
+        </h2>
+        <div class="bg-gray-50 p-5 rounded-xl shadow-sm mb-6">
+            <label for="inputText" class="block text-gray-700 text-sm font-medium mb-2">Enter Text:</label>
+            <textarea id="inputText" placeholder="Type your text here..."
+                      class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition duration-200 resize-y min-h-[100px]"></textarea>
+
+            <div class="flex flex-col sm:flex-row gap-4 mt-4">
+                <div class="flex-1">
+                    <label for="sourceLanguage" class="block text-gray-700 text-sm font-medium mb-2">Source Language:</label>
+                    <select id="sourceLanguage"
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition duration-200">
+                        <option value="en">English</option>
+                        <option value="hi">Hindi</option>
+                        <option value="mr">Marathi</option>
+                        <option value="gu">Gujarati</option>
+                        <option value="ta">Tamil</option>
+                        <option value="bn">Bengali</option>
+                        <option value="te">Telugu</option>
+                        <option value="kn">Kannada</option>
+                    </select>
+                </div>
+                <div class="flex-1">
+                    <label for="targetLanguage" class="block text-gray-700 text-sm font-medium mb-2">Target Language:</label>
+                    <select id="targetLanguage"
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition duration-200">
+                        <option value="hi">Hindi</option>
+                        <option value="en">English</option>
+                        <option value="mr">Marathi</option>
+                        <option value="gu">Gujarati</option>
+                        <option value="ta">Tamil</option>
+                        <option value="bn">Bengali</option>
+                        <option value="te">Telugu</option>
+                        <option value="kn">Kannada</option>
+                    </select>
+                </div>
+            </div>
+
+            <button id="translateButton"
+                    class="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75">
+                Translate Text
+            </button>
+
+            <p id="errorMessage" class="text-red-600 text-center mt-4 font-medium"></p>
+
+            <div class="mt-6">
+                <label for="outputText" class="block text-gray-700 text-sm font-medium mb-2">Translated Text:</label>
+                <div id="outputText"
+                     class="bg-blue-50 p-4 rounded-lg min-h-[80px] text-gray-800 text-lg border border-blue-200 flex items-center justify-center text-center">
+                    Your translation will appear here.
+                </div>
+            </div>
+        </div>
+
+        <!-- Document Translation Section (Conceptual) -->
+        <h2 class="text-2xl font-semibold text-gray-700 mb-4 pb-2 border-b border-gray-200 mt-8">
+            2. Document Translation (Conceptual)
+        </h2>
+        <div class="bg-gray-50 p-5 rounded-xl shadow-sm mb-6">
+            <label for="documentUpload" class="block text-gray-700 text-sm font-medium mb-2">Upload Document (PDF, DOCX, PPTX):</label>
+            <input type="file" id="documentUpload" accept=".pdf,.doc,.docx,.ppt,.pptx"
+                   class="w-full p-2 border border-gray-300 rounded-lg bg-white cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+            <button id="translateDocumentButton"
+                    class="mt-4 w-full bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75 feature-button">
+                Translate Document
+            </button>
+        </div>
+
+        <!-- Voice & Audio Translation Section (Conceptual) -->
+        <h2 class="text-2xl font-semibold text-gray-700 mb-4 pb-2 border-b border-gray-200 mt-8">
+            3. Voice & Audio Translation (Conceptual)
+        </h2>
+        <div class="bg-gray-50 p-5 rounded-xl shadow-sm mb-6">
+            <label for="audioUpload" class="block text-gray-700 text-sm font-medium mb-2">Upload Audio (MP3, WAV):</label>
+            <input type="file" id="audioUpload" accept=".mp3,.wav"
+                   class="w-full p-2 border border-gray-300 rounded-lg bg-white cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+            <div class="flex flex-col sm:flex-row gap-4 mt-4">
+                <button id="recordAudioButton"
+                        class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75 feature-button">
+                    Record Audio (Mock)
+                </button>
+                <button id="translateAudioButton"
+                        class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75 feature-button">
+                    Translate Audio
+                </button>
+            </div>
+        </div>
+
+        <!-- Real-Time Chat Translator Section (Conceptual UI) -->
+        <h2 class="text-2xl font-semibold text-gray-700 mb-4 pb-2 border-b border-gray-200 mt-8">
+            4. Real-Time Chat Translator (Conceptual UI)
+        </h2>
+        <div class="bg-gray-50 p-5 rounded-xl shadow-sm mb-6">
+            <div id="chatArea" class="chat-area h-48 overflow-y-auto border border-gray-300 rounded-lg p-3 bg-white mb-4">
+                <div class="chat-message translated bg-blue-100 text-blue-800 p-2 rounded-lg mb-2 mr-auto max-w-[80%]">System: Hello! How can I help you?</div>
+            </div>
+            <div class="flex gap-3">
+                <input type="text" id="chatInput" placeholder="Type your message..."
+                       class="w-full flex-grow p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition duration-200">
+                <button id="sendChatMessageButton"
+                        class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75">
+                    Send
+                </button>
+            </div>
+        </div>
+
+        <!-- Custom Dictionary & Glossary Section (Conceptual) -->
+        <h2 class="text-2xl font-semibold text-gray-700 mb-4 pb-2 border-b border-gray-200 mt-8">
+            5. Custom Dictionary & Glossary (Conceptual)
+        </h2>
+        <div class="bg-gray-50 p-5 rounded-xl shadow-sm mb-6">
+            <p class="text-gray-700 mb-4">
+                Manage business/brand-specific vocabulary and custom term mappings for enhanced translation accuracy.
+            </p>
+            <button id="manageGlossaryButton"
+                    class="w-full bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75 feature-button">
+                Manage Glossary (Mock)
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // Get references to HTML elements
+        const inputTextElement = document.getElementById('inputText');
+        const sourceLanguageElement = document.getElementById('sourceLanguage');
+        const targetLanguageElement = document.getElementById('targetLanguage');
+        const translateButton = document.getElementById('translateButton');
+        const outputTextElement = document.getElementById('outputText');
+        const errorMessageElement = document.getElementById('errorMessage');
+
+        // Mock buttons for conceptual features
+        const translateDocumentButton = document.getElementById('translateDocumentButton');
+        const recordAudioButton = document.getElementById('recordAudioButton');
+        const translateAudioButton = document.getElementById('translateAudioButton');
+        const sendChatMessageButton = document.getElementById('sendChatMessageButton');
+        const chatInput = document.getElementById('chatInput');
+        const chatArea = document.getElementById('chatArea');
+        const manageGlossaryButton = document.getElementById('manageGlossaryButton');
+
+
+        // Define a simple dictionary for mock translations
+        // This dictionary is now structured by language pairs for more accurate lookups.
+        // It includes common phrases and individual words.
+        // In a real BhashaConvert, this would be powered by advanced AI/LLMs
+        // that understand context, grammar, and idiomatic expressions.
+        const translationDictionary = {
+            // --- English to Hindi ---
+            "en-hi": {
+                "hello": "नमस्ते",
+                "how are you": "आप कैसे हैं",
+                "thank you": "धन्यवाद",
+                "good morning": "सुप्रभात",
+                "india": "भारत",
+                "college": "महाविद्यालय",
+                "project": "परियोजना",
+                "language": "भाषा",
+                "converter": "परिवर्तक",
+                "student": "छात्र",
+                "teacher": "शिक्षक",
+                "book": "किताब",
+                "computer": "कंप्यूटर",
+                "software": "सॉफ्टवेयर",
+                "requirements": "आवश्यकताएँ",
+                "specification": "विनिर्देश",
+                "platform": "मंच",
+                "ai": "एआई",
+                "machine learning": "मशीन लर्निंग",
+                "data": "डेटा",
+                "solution": "समाधान",
+                "communication": "संचार",
+                "document": "दस्तावेज़",
+                "audio": "ऑडियो",
+                "video": "वीडियो",
+                "text": "पाठ",
+                "translate": "अनुवाद करें",
+                "help": "मदद",
+                "please": "कृपया",
+                "my name is krishna": "मेरा नाम कृष्णा है",
+                "i am pursuing bca": "मैं बीसीए कर रहा हूँ",
+                "from gh raisoni college": "जी एच रायसोनी कॉलेज से",
+                // Common words for word-by-word fallback
+                "i": "मैं", "am": "हूँ", "you": "आप", "are": "हैं", "a": "एक", "is": "है", "name": "नाम", "my": "मेरा", "from": "से",
+                "how": "कैसे", "what": "क्या", "where": "कहाँ", "when": "कब", "who": "कौन", "why": "क्यों", "this": "यह", "that": "वह", "and": "और", "but": "लेकिन"
+            },
+
+            // --- Hindi to English ---
+            "hi-en": {
+                "नमस्ते": "Hello",
+                "आप कैसे हैं": "How are you",
+                "धन्यवाद": "Thank you",
+                "सुप्रभात": "Good Morning",
+                "भारत": "India",
+                "महाविद्यालय": "College",
+                "परियोजना": "Project",
+                "भाषा": "Language",
+                "परिवर्तक": "Converter",
+                "छात्र": "Student",
+                "शिक्षक": "Teacher",
+                "किताब": "Book",
+                "कंप्यूटर": "Computer",
+                "सॉफ्टवेयर": "Software",
+                "आवश्यकताएँ": "Requirements",
+                "विनिर्देश": "Specification",
+                "मंच": "Platform",
+                "एआई": "AI",
+                "मशीन लर्निंग": "Machine Learning",
+                "डेटा": "Data",
+                "समाधान": "Solution",
+                "संचार": "Communication",
+                "दस्तावेज़": "Document",
+                "ऑडियो": "Audio",
+                "वीडियो": "Video",
+                "पाठ": "Text",
+                "अनुवाद करें": "Translate",
+                "मदद": "Help",
+                "कृपया": "Please",
+                "मेरा नाम कृष्णा है": "My name is Krishna",
+                "मैं बीसीए कर रहा हूँ": "I am pursuing BCA",
+                "जी एच रायसोनी कॉलेज से": "from G H Raisoni College",
+                // Common words for word-by-word fallback
+                "मैं": "I", "हूँ": "am", "आप": "you", "हैं": "are", "एक": "a", "है": "is", "नाम": "name", "मेरा": "my", "से": "from",
+                "कैसे": "how", "क्या": "what", "कहाँ": "where", "कब": "when", "कौन": "who", "क्यों": "why", "यह": "this", "वह": "that", "और": "and", "लेकिन": "but"
+            },
+
+            // --- English to Marathi ---
+            "en-mr": {
+                "hello": "नमस्कार",
+                "how are you": "कसे आहात",
+                "thank you": "धन्यवाद",
+                "good morning": "शुभ प्रभात",
+                "india": "भारत",
+                "college": "महाविद्यालय",
+                "project": "प्रकल्प",
+                "language": "भाषा",
+                "converter": "रूपांतरण",
+                "student": "विद्यार्थी",
+                "teacher": "शिक्षक",
+                "book": "पुस्तक",
+                "computer": "संगणक",
+                "software": "सॉफ्टवेअर",
+                "requirements": "गरजा",
+                "specification": "तपशील",
+                "platform": "प्लॅटफॉर्म",
+                "ai": "एआय",
+                "machine learning": "मशीन लर्निंग",
+                "data": "डेटा",
+                "solution": "उपाय",
+                "communication": "संवाद",
+                "document": "दस्तऐवज",
+                "audio": "ऑडिओ",
+                "video": "व्हिडिओ",
+                "text": "मजकूर",
+                "translate": "अनुवाद करा",
+                "help": "मदत",
+                "please": "कृपया",
+                "my name is krishna": "माझे नाव कृष्णा आहे",
+                "i am pursuing bca": "मी बीसीए करत आहे",
+                "from gh raisoni college": "जी एच रायसोनी कॉलेजमधून",
+                // Common words for word-by-word fallback
+                "i": "मी", "am": "आहे", "you": "तुम्ही", "are": "आहात", "a": "एक", "is": "आहे", "name": "नाव", "my": "माझे", "from": "मधून",
+                "how": "कसे", "what": "काय", "where": "कुठे", "when": "कधी", "who": "कोण", "why": "का", "this": "हे", "that": "ते", "and": "आणि", "but": "पण"
+            },
+
+            // --- Marathi to English ---
+            "mr-en": {
+                "नमस्कार": "Hello",
+                "कसे आहात": "How are you",
+                "धन्यवाद": "Thank you",
+                "शुभ प्रभात": "Good Morning",
+                "भारत": "India",
+                "महाविद्यालय": "College",
+                "प्रकल्प": "Project",
+                "भाषा": "Language",
+                "रूपांतरण": "Converter",
+                "विद्यार्थी": "Student",
+                "शिक्षक": "Teacher",
+                "पुस्तक": "Book",
+                "संगणक": "Computer",
+                "सॉफ्टवेअर": "Software",
+                "गरजा": "Requirements",
+                "तपशील": "Specification",
+                "प्लॅटफॉर्म": "Platform",
+                "एआय": "AI",
+                "मशीन लर्निंग": "Machine Learning",
+                "डेटा": "Data",
+                "उपाय": "Solution",
+                "संवाद": "Communication",
+                "दस्तऐवज": "Document",
+                "ऑडिओ": "Audio",
+                "व्हिडिओ": "Video",
+                "मजकूर": "Text",
+                "अनुवाद करा": "Translate",
+                "मदत": "Help",
+                "कृपया": "Please",
+                "माझे नाव कृष्णा आहे": "My name is Krishna",
+                "मी बीसीए करत आहे": "I am pursuing BCA",
+                "जी एच रायसोनी कॉलेजमधून": "from G H Raisoni College",
+                // Common words for word-by-word fallback
+                "मी": "I", "आहे": "am", "तुम्ही": "you", "आहात": "are", "एक": "a", "नाव": "name", "माझे": "my", "मधून": "from",
+                "कसे": "how", "काय": "what", "कुठे": "where", "कधी": "when", "कोण": "who", "का": "why", "हे": "this", "ते": "that", "आणि": "and", "पण": "but"
+            },
+
+            // --- English to Gujarati ---
+            "en-gu": {
+                "hello": "નમસ્તે",
+                "how are you": "કેમ છો",
+                "thank you": "આભાર",
+                "good morning": "શુભ સવાર",
+                "india": "ભારત",
+                "project": "પ્રોજેક્ટ",
+                "language": "ભાષા",
+                "converter": "કન્વર્ટર",
+                "student": "વિદ્યાર્થી",
+                "college": "કોલેજ",
+                "my name is krishna": "મારું નામ કૃષ્ણ છે",
+                "i am pursuing bca": "હું બીસીએ કરી રહ્યો છું",
+                "from gh raisoni college": "જી એચ રાયસોની કોલેજમાંથી",
+                // Common words for word-by-word fallback
+                "i": "હું", "am": "છું", "you": "તમે", "are": "છો", "a": "એક", "is": "છે", "name": "નામ", "my": "મારું", "from": "માંથી",
+                "how": "કેમ", "what": "શું", "where": "ક્યાં", "when": "ક્યારે", "who": "કોણ", "why": "શા માટે", "this": "આ", "that": "તે", "and": "અને", "but": "પરંતુ"
+            },
+
+            // --- Gujarati to English ---
+            "gu-en": {
+                "નમસ્તે": "Hello",
+                "કેમ છો": "How are you",
+                "આભાર": "Thank you",
+                "શુભ સવાર": "Good Morning",
+                "ભારત": "India",
+                "પ્રોજેક્ટ": "Project",
+                "ભાષા": "Language",
+                "कन्भर्टर": "Converter",
+                "વિદ્યાર્થી": "Student",
+                "કોલેજ": "College",
+                "મારું નામ કૃષ્ણ છે": "My name is Krishna",
+                "હું બીસીએ કરી રહ્યો છું": "I am pursuing BCA",
+                "જી એચ રાયસોની કોલેજમાંથી": "from G H Raisoni College",
+                // Common words for word-by-word fallback
+                "હું": "I", "છું": "am", "તમે": "you", "છો": "are", "એક": "a", "છે": "is", "નામ": "name", "મારું": "my", "માંથી": "from",
+                "કેમ": "how", "શું": "what", "ક્યાં": "where", "ક્યારે": "when", "કોણ": "who", "શા માટે": "why", "આ": "this", "તે": "that", "અને": "and", "પરંતુ": "but"
+            },
+
+            // --- English to Tamil ---
+            "en-ta": {
+                "hello": "வணக்கம்",
+                "how are you": "எப்படி இருக்கிறீர்கள்",
+                "thank you": "நன்றி",
+                "good morning": "காலை வணக்கம்",
+                "india": "இந்தியா",
+                "project": "திட்டம்",
+                "language": "மொழி",
+                "converter": "மாற்றி",
+                "student": "மாணவர்",
+                "college": "கல்லூரி",
+                "my name is krishna": "என் பெயர் கிருஷ்ணா",
+                "i am pursuing bca": "நான் பிசிஏ படித்து வருகிறேன்",
+                "from gh raisoni college": "ஜி எச் ராய்சோனி கல்லூரியில் இருந்து",
+                // Common words for word-by-word fallback
+                "i": "நான்", "am": "இருக்கிறேன்", "you": "நீங்கள்", "are": "இருக்கிறீர்கள்", "a": "ஒரு", "is": "ஆகும்", "name": "பெயர்", "my": "என்", "from": "இருந்து",
+                "how": "எப்படி", "what": "என்ன", "where": "எங்கே", "when": "எப்போது", "who": "யார்", "why": "ஏன்", "this": "இது", "that": "அது", "and": "மற்றும்", "but": "ஆனால்"
+            },
+
+            // --- Tamil to English ---
+            "ta-en": {
+                "வணக்கம்": "Hello",
+                "எப்படி இருக்கிறீர்கள்": "How are you",
+                "நன்றி": "Thank you",
+                "காலை வணக்கம்": "Good Morning",
+                "இந்தியா": "India",
+                "திட்டம்": "Project",
+                "மொழி": "Language",
+                "மாற்றி": "Converter",
+                "மாணவர்": "Student",
+                "கல்லூரி": "College",
+                "என் பெயர் கிருஷ்ணா": "My name is Krishna",
+                "நான் பிசிஏ படித்து வருகிறேன்": "I am pursuing BCA",
+                "ஜி எச் ராய்சோனி கல்லூரியில் இருந்து": "from G H Raisoni College",
+                // Common words for word-by-word fallback
+                "நான்": "I", "இருக்கிறேன்": "am", "நீங்கள்": "you", "இருக்கிறீர்கள்": "are", "ஒரு": "a", "ஆகும்": "is", "பெயர்": "name", "என்": "my", "இருந்து": "from",
+                "எப்படி": "how", "என்ன": "what", "எங்கே": "where", "எப்போது": "when", "யார்": "who", "ஏன்": "why", "இது": "this", "அது": "that", "மற்றும்": "and", "ஆனால்": "but"
+            },
+
+            // --- English to Bengali ---
+            "en-bn": {
+                "hello": "হ্যালো",
+                "how are you": "কেমন আছেন",
+                "thank you": "ধন্যবাদ",
+                "good morning": "শুভ সকাল",
+                "india": "ভারত",
+                "project": "প্রজেক্ট",
+                "language": "ভাষা",
+                "converter": "রূপান্তরকারী",
+                "student": "ছাত্র",
+                "college": "কলেজ",
+                "my name is krishna": "আমার নাম কৃষ্ণ",
+                "i am pursuing bca": "আমি বিসিএ পড়ছি",
+                "from gh raisoni college": "জি এইচ রায়সোনি কলেজ থেকে",
+                // Common words for word-by-word fallback
+                "i": "আমি", "am": "আছি", "you": "আপনি", "are": "আছেন", "a": "একটি", "is": "হয়", "name": "নাম", "my": "আমার", "from": "থেকে",
+                "how": "কেমন", "what": "কি", "where": "কোথায়", "when": "কখন", "who": "কে", "why": "কেন", "this": "এটি", "that": "ওটি", "and": "এবং", "but": "কিন্তু"
+            },
+
+            // --- Bengali to English ---
+            "bn-en": {
+                "হ্যালো": "Hello",
+                "কেমন আছেন": "How are you",
+                "ধন্যবাদ": "Thank you",
+                "শুভ সকাল": "Good Morning",
+                "ভারত": "India",
+                "প্রজেক্ট": "Project",
+                "ভাষা": "Language",
+                "রূপান্তরকারী": "Converter",
+                "ছাত্র": "Student",
+                "কলেজ": "College",
+                "আমার নাম কৃষ্ণ": "My name is Krishna",
+                "আমি বিসিএ পড়ছি": "I am pursuing BCA",
+                "জি এইচ রায়সোনি কলেজ থেকে": "from G H Raisoni College",
+                // Common words for word-by-word fallback
+                "আমি": "I", "আছি": "am", "আপনি": "you", "আছেন": "are", "একটি": "a", "হয়": "is", "নাম": "name", "আমার": "my", "থেকে": "from",
+                "কেমন": "how", "কি": "what", "কোথায়": "where", "কখন": "when", "কে": "who", "কেন": "why", "এটি": "this", "ওটি": "that", "এবং": "and", "কিন্তু": "but"
+            },
+
+            // --- English to Telugu ---
+            "en-te": {
+                "hello": "నమస్కారం",
+                "how are you": "ఎలా ఉన్నారు",
+                "thank you": "ధన్యవాదాలు",
+                "good morning": "శుభోదయం",
+                "india": "భారతదేశం",
+                "project": "ప్రాజెక్ట్",
+                "language": "భాష",
+                "converter": "కన్వర్టర్",
+                "student": "విద్యార్థి",
+                "college": "కళాశాల",
+                "my name is krishna": "నా పేరు కృష్ణ",
+                "i am pursuing bca": "నేను బిసిఎ చదువుతున్నాను",
+                "from gh raisoni college": "జి హెచ్ రాయ్సోని కళాశాల నుండి",
+                // Common words for word-by-word fallback
+                "i": "నేను", "am": "ఉన్నాను", "you": "మీరు", "are": "ఉన్నారు", "a": "ఒక", "is": "అవుతుంది", "name": "పేరు", "my": "నా", "from": "నుండి",
+                "how": "ఎలా", "what": "ఏమిటి", "where": "ఎక్కడ", "when": "ఎప్పుడు", "who": "ఎవరు", "why": "ఎందుకు", "this": "ఇది", "that": "అది", "and": "మరియు", "but": "కానీ"
+            },
+
+            // --- Telugu to English ---
+            "te-en": {
+                "నమస్కారం": "Hello",
+                "ఎలా ఉన్నారు": "How are you",
+                "ధన్యవాదాలు": "Thank you",
+                "శుభోదయం": "Good Morning",
+                "భారతదేశం": "India",
+                "ప్రాజెక్ట్": "Project",
+                "భాష": "Language",
+                "కన్వర్టర్": "Converter",
+                "విద్యార్థి": "Student",
+                "కళాశాల": "College",
+                "నా పేరు కృష్ణ": "My name is Krishna",
+                "నేను బిసిఎ చదువుతున్నాను": "I am pursuing BCA",
+                "జి హెచ్ రాయ్సోని కళాశాల నుండి": "from G H Raisoni College",
+                // Common words for word-by-word fallback
+                "నేను": "I", "ఉన్నాను": "am", "మీరు": "you", "ఉన్నారు": "are", "ఒక": "a", "అవుతుంది": "is", "పేరు": "name", "నా": "my", "నుండి": "from",
+                "ఎలా": "how", "ఏమిటి": "what", "ఎక్కడ": "where", "ఎప్పుడు": "when", "ఎవరు": "who", "ఎందుకు": "why", "ఇది": "this", "అది": "that", "మరియు": "and", "కానీ": "but"
+            },
+
+            // --- English to Kannada ---
+            "en-kn": {
+                "hello": "ನಮಸ್ಕಾರ",
+                "how are you": "ಹೇಗಿದ್ದೀರಾ",
+                "thank you": "ಧನ್ಯವಾದಗಳು",
+                "good morning": "ಶುಭೋದಯ",
+                "india": "ಭಾರತ",
+                "project": "ಯೋಜನೆ",
+                "language": "ಭಾಷೆ",
+                "converter": "ಪರಿವರ್ತಕ",
+                "student": "ವಿದ್ಯಾರ್ಥಿ",
+                "college": "ಕಾಲೇಜು",
+                "my name is krishna": "ನನ್ನ ಹೆಸರು ಕೃಷ್ಣ",
+                "i am pursuing bca": "ನಾನು ಬಿಸಿಎ ಓದುತ್ತಿದ್ದೇನೆ",
+                "from gh raisoni college": "ಜಿ ಎಚ್ ರೈಸೋನಿ ಕಾಲೇಜಿನಿಂದ",
+                // Common words for word-by-word fallback
+                "i": "ನಾನು", "am": "ಇದ್ದೇನೆ", "you": "ನೀವು", "are": "ಇದ್ದೀರಾ", "a": "ಒಂದು", "is": "ಆಗಿದೆ", "name": "ಹೆಸರು",
+                "my": "ನನ್ನ", "from": "ಇಂದ",
+                "how": "ಹೇಗೆ", "what": "ಏನು", "where": "ಎಲ್ಲಿ", "when": "ಯಾವಾಗ", "who": "ಯಾರು", "why": "ಏಕೆ", "this": "ಇದು", "that": "ಅದು", "and": "ಮತ್ತು", "but": "ಆದರೆ"
+            },
+
+            // --- Kannada to English ---
+            "kn-en": {
+                "ನಮಸ್ಕಾರ": "Hello",
+                "ಹೇಗಿದ್ದೀರಾ": "How are you",
+                "ಧನ್ಯವಾದಗಳು": "Thank you",
+                "ಶುಭೋದಯ": "Good Morning",
+                "ಭಾರತ": "India",
+                "ಯೋಜನೆ": "Project",
+                "ಭಾಷೆ": "Language",
+                "ಪರಿವರ್ತಕ": "Converter",
+                "ವಿದ್ಯಾರ್ಥಿ": "Student",
+                "ಕಾಲೇಜು": "College",
+                "ನನ್ನ ಹೆಸರು ಕೃಷ್ಣ": "My name is Krishna",
+                "ನಾನು ಬಿಸಿಎ ಓದುತ್ತಿದ್ದೇನೆ": "I am pursuing BCA",
+                "ಜಿ ಎಚ್ ರೈಸೋನಿ ಕಾಲೇಜಿನಿಂದ": "from G H Raisoni College",
+                // Common words for word-by-word fallback
+                "ನಾನು": "I", "ಇದ್ದೇನೆ": "am", "ನೀವು": "you", "ಇದ್ದೀರಾ": "are", "ಒಂದು": "a", "ಆಗಿದೆ": "is", "ಹೆಸರು": "name",
+                "ನನ್ನ": "my", "ಇಂದ": "from",
+                "ಹೇಗೆ": "how", "ಏನು": "what", "ಎಲ್ಲಿ": "where", "ಯಾವಾಗ": "when", "ಯಾರು": "who", "ಏಕೆ": "why", "ಇದು": "this", "ಅದು": "that", "ಮತ್ತು": "and", "ಆದರೆ": "but"
+            }
+        };
+
+        // Function to perform the mock translation
+        function performMockTranslation(text, sourceLang, targetLang) {
+            const lowerText = text.toLowerCase().trim();
+            const langPairKey = `${sourceLang}-${targetLang}`;
+
+            // Get the specific dictionary for the selected language pair
+            const currentLangDict = translationDictionary[langPairKey];
+
+            if (!currentLangDict) {
+                // If the language pair is not supported in our mock dictionary
+                return `Translation not available for ${sourceLang.toUpperCase()} to ${targetLang.toUpperCase()}.`;
+            }
+
+            // 1. Try to find an exact phrase match first
+            // Iterate through the dictionary keys for the current language pair
+            // and check if the input text exactly matches any phrase.
+            for (const phrase in currentLangDict) {
+                if (lowerText === phrase) {
+                    return currentLangDict[phrase];
+                }
+            }
+
+            // 2. If no exact phrase match, try word-by-word translation
+            const words = lowerText.split(/\s+/); // Split by spaces
+            let translatedWords = [];
+
+            for (const word of words) {
+                // Look up each word in the specific language pair dictionary
+                // If a translation for the word exists, use it; otherwise, keep the original word.
+                let translatedWord = currentLangDict[word] || word;
+                translatedWords.push(translatedWord);
+            }
+
+            // Join the translated words back into a sentence
+            return translatedWords.join(' ');
+        }
+
+
+        // Event listener for the main text translate button
+        translateButton.addEventListener('click', () => {
+            const inputText = inputTextElement.value.trim();
+            const sourceLang = sourceLanguageElement.value;
+            const targetLang = targetLanguageElement.value;
+
+            // Clear previous error messages
+            errorMessageElement.textContent = '';
+            outputTextElement.textContent = '';
+
+            if (inputText === "") {
+                errorMessageElement.textContent = "Please enter some text to translate.";
+                return;
+            }
+
+            if (sourceLang === targetLang) {
+                errorMessageElement.textContent = "Source and Target languages cannot be the same.";
+                return;
+            }
+
+            // Perform the mock translation
+            const translatedText = performMockTranslation(inputText, sourceLang, targetLang);
+            outputTextElement.textContent = translatedText;
+        });
+
+        // Add a small initial message to the output box
+        outputTextElement.textContent = "Your translation will appear here.";
+
+        // --- Event listeners for conceptual features (mock functionality) ---
+
+        // Document Translation Button
+        translateDocumentButton.addEventListener('click', () => {
+            const fileInput = document.getElementById('documentUpload');
+            if (fileInput.files.length > 0) {
+                errorMessageElement.textContent = "Document upload detected! In a real system, this document would now be processed for translation.";
+                outputTextElement.textContent = "Conceptual: Document translation initiated for " + fileInput.files[0].name + ".";
+            } else {
+                errorMessageElement.textContent = "Please select a document to 'translate'.";
+            }
+        });
+
+        // Record Audio Button (Mock)
+        recordAudioButton.addEventListener('click', () => {
+            errorMessageElement.textContent = "Conceptual: Audio recording feature would be activated here.";
+            outputTextElement.textContent = "Conceptual: Recording audio... (This is a placeholder)";
+        });
+
+        // Translate Audio Button
+        translateAudioButton.addEventListener('click', () => {
+            const audioInput = document.getElementById('audioUpload');
+            if (audioInput.files.length > 0) {
+                errorMessageElement.textContent = "Audio file detected! In a real system, this audio would be transcribed and translated.";
+                outputTextElement.textContent = "Conceptual: Audio translation initiated for " + audioInput.files[0].name + ".";
+            } else {
+                errorMessageElement.textContent = "Please select an audio file to 'translate'.";
+            }
+        });
+
+        // Send Chat Message Button (Mock)
+        sendChatMessageButton.addEventListener('click', () => {
+            const message = chatInput.value.trim();
+            if (message) {
+                // Add user message to chat area
+                const userMessageDiv = document.createElement('div');
+                userMessageDiv.className = 'chat-message user bg-blue-200 text-blue-900 p-2 rounded-lg mb-2 max-w-[80%]'; // Tailwind classes
+                userMessageDiv.textContent = `You: ${message}`;
+                chatArea.appendChild(userMessageDiv);
+
+                // Simulate a translated response (very basic mock)
+                // Assuming English input for simplicity in chat, translate to Hindi
+                const mockTranslatedMessage = performMockTranslation(message, 'en', 'hi');
+                const translatedMessageDiv = document.createElement('div');
+                translatedMessageDiv.className = 'chat-message translated bg-gray-200 text-gray-900 p-2 rounded-lg mb-2 max-w-[80%]'; // Tailwind classes
+                translatedMessageDiv.textContent = `Translated: ${mockTranslatedMessage}`;
+                chatArea.appendChild(translatedMessageDiv);
+
+                chatInput.value = ''; // Clear input
+                chatArea.scrollTop = chatArea.scrollHeight; // Scroll to bottom
+            }
+        });
+
+        // Manage Glossary Button (Mock)
+        manageGlossaryButton.addEventListener('click', () => {
+            errorMessageElement.textContent = "Conceptual: This would open a dedicated interface for managing custom glossaries.";
+            outputTextElement.textContent = "Conceptual: Glossary management feature is under development.";
+        });
+
+    </script>
+</body>
+</html>

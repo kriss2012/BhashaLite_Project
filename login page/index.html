@@ -1,0 +1,636 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animated Login Form with Firebase</title>
+    <!-- Font Awesome for Google icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Original CSS from krish (1).html, now inline */
+        @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap');
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Quicksand', sans-serif;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #000;
+        }
+        section {
+            position: absolute;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2px;
+            flex-wrap: wrap;
+            overflow: hidden;
+        }
+        section::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(#000, #0f0, #000);
+            animation: animate 5s linear infinite;
+        }
+        @keyframes animate {
+            0% {
+                transform: translateY(-100%);
+            }
+            100% {
+                transform: translateY(100%);
+            }
+        }
+        section span {
+            position: relative;
+            display: block;
+            width: calc(6.25vw - 2px);
+            height: calc(6.25vw - 2px);
+            background: #181818;
+            z-index: 2;
+            transition: 1.5s;
+        }
+        section span:hover {
+            background: #0f0;
+            transition: 0s;
+        }
+
+        section .signin {
+            position: absolute;
+            width: 400px;
+            background: #222;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            border-radius: 4px;
+            box-shadow: 0 15px 35px rgba(0,0,0,9);
+        }
+        section .signin .content {
+            position: relative;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 40px;
+        }
+        section .signin .content h2 {
+            font-size: 2em;
+            color: #0f0;
+            text-transform: uppercase;
+        }
+        section .signin .content .form {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        section .signin .content .form .inputBox {
+            position: relative;
+            width: 100%;
+        }
+        section .signin .content .form .inputBox input {
+            position: relative;
+            width: 100%;
+            background: #333;
+            border: none;
+            outline: none;
+            padding: 25px 10px 7.5px;
+            border-radius: 4px;
+            color: #fff;
+            font-weight: 500;
+            font-size: 1em;
+        }
+        section .signin .content .form .inputBox i {
+            position: absolute;
+            left: 0;
+            padding: 15px 10px;
+            font-style: normal;
+            color: #aaa;
+            transition: 0.5s;
+            pointer-events: none;
+        }
+        .signin .content .form .inputBox input:focus ~ i,
+        .signin .content .form .inputBox input:valid ~ i {
+            transform: translateY(-7.5px);
+            font-size: 0.8em;
+            color: #fff;
+        }
+        .signin .content .form .links {
+            position: relative;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+        }
+        .signin .content .form .links a {
+            color: #fff;
+            text-decoration: none;
+        }
+        .signin .content .form .links a:nth-child(2) {
+            color: #0f0;
+            font-weight: 600;
+        }
+        .signin .content .form .inputBox input[type="submit"] {
+            padding: 10px;
+            background: #0f0;
+            color: #000;
+            font-weight: 600;
+            font-size: 1.35em;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+        }
+        input[type="submit"]:active {
+            opacity: 0.6;
+        }
+        @media (max-width: 900px) {
+            section span {
+                width: calc(10vw - 2px);
+                height: calc(10vw - 2px);
+            }
+        }
+        @media (max-width: 600px) {
+            section span {
+                width: calc(20vw - 2px);
+                height: calc(20vw - 2px);
+            }
+        }
+
+        /* Custom styling for status/error messages - adapted to your theme */
+        .message-box {
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 15px;
+            font-weight: 500;
+            text-align: center;
+            font-size: 0.9em;
+        }
+        .message-box.success {
+            background-color: #0d3; /* Darker green */
+            color: #000;
+        }
+        .message-box.error {
+            background-color: #f00; /* Red */
+            color: #fff;
+        }
+        .message-box.info {
+            background-color: #007bff; /* Blue */
+            color: #fff;
+        }
+
+        /* Hide/Show elements based on login state */
+        .hidden {
+            display: none !important;
+        }
+        .google-btn {
+            background: #4285F4; /* Google Blue */
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1.1em;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: 0.3s;
+        }
+        .google-btn:hover {
+            background: #357ae8;
+        }
+        .google-btn i {
+            font-size: 1.2em;
+        }
+        .or-separator {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: #aaa;
+            font-size: 0.9em;
+            margin: 15px 0;
+        }
+        .or-separator::before,
+        .or-separator::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #444;
+        }
+        .or-separator:not(:empty)::before {
+            margin-right: .5em;
+        }
+        .or-separator:not(:empty)::after {
+            margin-left: .5em;
+        }
+        .user-dashboard {
+            color: #fff;
+            text-align: center;
+            gap: 20px;
+        }
+        .user-dashboard h2 {
+            color: #0f0;
+            margin-bottom: 10px;
+        }
+        .user-dashboard p {
+            margin-bottom: 10px;
+            word-break: break-all; /* Ensure long UIDs/emails wrap */
+        }
+        .user-dashboard button {
+            width: 100%;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        .user-dashboard #logout-button {
+            background: #dc3545; /* Red for logout */
+            color: #fff;
+        }
+        .user-dashboard #logout-button:hover {
+            background: #c82333;
+        }
+        .user-dashboard #go-to-bhashalite-button {
+            background: #007bff; /* Blue for app link */
+            color: #fff;
+        }
+        .user-dashboard #go-to-bhashalite-button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <section>
+        <!-- Spans for animated background -->
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+    <div class="signin bg-gray-900 p-8 rounded-xl shadow-2xl z-50 w-full max-w-md border border-gray-700">
+        <div class="content w-full flex flex-col items-center gap-8">
+            <h2 class="text-4xl font-extrabold text-green-400 uppercase tracking-wide">Sign In</h2>
+
+            <!-- Status/Error Message Box -->
+            <div id="messageBox" class="message-box w-full hidden"></div>
+
+            <!-- Login Form (Initially Visible) -->
+            <div id="login-form" class="form w-full flex flex-col gap-6">
+                <div class="inputBox relative w-full">
+                    <input type="email" id="login-email" name="email" required
+                           class="relative w-full bg-gray-800 border-b-2 border-gray-600 outline-none p-4 pt-7 rounded-md text-white font-medium text-lg focus:border-green-400 transition duration-300">
+                    <i class="absolute left-0 top-0 p-4 pt-7 font-normal text-gray-400 transition-all duration-300 pointer-events-none text-lg">Email</i>
+                </div>
+                <div class="inputBox relative w-full">
+                    <input type="password" id="login-password" name="password" required
+                           class="relative w-full bg-gray-800 border-b-2 border-gray-600 outline-none p-4 pt-7 rounded-md text-white font-medium text-lg focus:border-green-400 transition duration-300">
+                    <i class="absolute left-0 top-0 p-4 pt-7 font-normal text-gray-400 transition-all duration-300 pointer-events-none text-lg">Password</i>
+                </div>
+                <div class="links flex justify-between w-full text-sm">
+                    <a href="#" id="forgot-password-link" class="text-gray-400 hover:text-green-400 transition duration-300">Forgot Password</a>
+                    <a href="#" id="signup-link" class="text-green-400 font-semibold hover:text-green-300 transition duration-300">Signup</a>
+                </div>
+                <div class="inputBox w-full">
+                    <input type="submit" value="Login" id="email-login-button"
+                           class="w-full p-3 bg-green-500 text-gray-900 font-bold text-xl tracking-wider cursor-pointer rounded-md shadow-lg hover:bg-green-400 transition duration-300 transform hover:scale-105 active:scale-95">
+                </div>
+
+                <div class="or-separator">OR</div>
+
+                <button id="google-login-button"
+                        class="google-btn">
+                    <i class="fab fa-google"></i> Sign in with Google
+                </button>
+            </div>
+
+            <!-- Signup Form (Initially Hidden) -->
+            <div id="signup-form" class="form w-full flex-col gap-6 hidden">
+                <h2 class="text-3xl font-extrabold text-green-400 uppercase tracking-wide text-center mb-4">Sign Up</h2>
+                <div class="inputBox relative w-full">
+                    <input type="email" id="signup-email" name="email" required
+                           class="relative w-full bg-gray-800 border-b-2 border-gray-600 outline-none p-4 pt-7 rounded-md text-white font-medium text-lg focus:border-green-400 transition duration-300">
+                    <i class="absolute left-0 top-0 p-4 pt-7 font-normal text-gray-400 transition-all duration-300 pointer-events-none text-lg">Email</i>
+                </div>
+                <div class="inputBox relative w-full">
+                    <input type="password" id="signup-password" name="password" required
+                           class="relative w-full bg-gray-800 border-b-2 border-gray-600 outline-none p-4 pt-7 rounded-md text-white font-medium text-lg focus:border-green-400 transition duration-300">
+                    <i class="absolute left-0 top-0 p-4 pt-7 font-normal text-gray-400 transition-all duration-300 pointer-events-none text-lg">Password</i>
+                </div>
+                <div class="inputBox relative w-full">
+                    <input type="password" id="confirm-password" name="confirm-password" required
+                           class="relative w-full bg-gray-800 border-b-2 border-gray-600 outline-none p-4 pt-7 rounded-md text-white font-medium text-lg focus:border-green-400 transition duration-300">
+                    <i class="absolute left-0 top-0 p-4 pt-7 font-normal text-gray-400 transition-all duration-300 pointer-events-none text-lg">Confirm Password</i>
+                </div>
+                <div class="inputBox w-full">
+                    <input type="submit" value="Register" id="email-signup-button"
+                           class="w-full p-3 bg-green-500 text-gray-900 font-bold text-xl tracking-wider cursor-pointer rounded-md shadow-lg hover:bg-green-400 transition duration-300 transform hover:scale-105 active:scale-95">
+                </div>
+                <p class="text-center text-gray-400 text-sm">Already have an account? <a href="#" id="back-to-login-link" class="text-green-400 font-semibold hover:text-green-300 transition duration-300">Login here</a></p>
+            </div>
+
+            <!-- User Dashboard (Hidden until logged in) -->
+            <div id="user-dashboard" class="user-dashboard w-full flex flex-col items-center gap-4 hidden">
+                <h2 class="text-3xl font-extrabold text-green-400 uppercase tracking-wide text-center">Welcome!</h2>
+                <p class="text-white text-lg text-center">You are logged in as:</p>
+                <p id="user-email" class="text-green-300 text-xl font-semibold break-all text-center"></p>
+                <p id="user-id" class="text-gray-400 text-sm break-all text-center"></p>
+                <button id="logout-button">
+                    Logout
+                </button>
+                <button id="go-to-bhashalite-button">
+                    Go to BhashaLite App
+                </button>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- Firebase SDKs -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // --- Firebase Initialization ---
+    // These global variables are provided by the Canvas environment.
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+    const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const googleProvider = new GoogleAuthProvider();
+
+    // --- UI Elements (declared globally, assigned in DOMContentLoaded) ---
+    let loginForm;
+    let signupForm;
+    let userDashboard;
+    let loginEmailInput;
+    let loginPasswordInput;
+    let emailLoginButton;
+    let googleLoginButton;
+    let signupLink;
+    let backToLoginLink;
+    let signupEmailInput;
+    let signupPasswordInput;
+    let confirmPasswordInput;
+    let emailSignupButton;
+    let logoutButton;
+    let goToBhashaLiteButton;
+    let userEmailDisplay;
+    let userIdDisplay;
+    let messageBox;
+
+    // --- Helper Function for Messages ---
+    function showMessage(message, type) {
+        if (messageBox) {
+            messageBox.textContent = message;
+            messageBox.className = `message-box ${type} block`; // Show and apply type class
+        } else {
+            console.warn("MessageBox element not found.");
+        }
+    }
+
+    function hideMessage() {
+        if (messageBox) {
+            messageBox.textContent = '';
+            messageBox.className = `message-box hidden`; // Hide
+        }
+    }
+
+    // --- Main Script Execution after DOM is loaded ---
+    document.addEventListener('DOMContentLoaded', () => {
+        // Assign UI elements after DOM is loaded
+        loginForm = document.getElementById('login-form'); // Changed from querySelector('.form') to specific ID
+        signupForm = document.getElementById('signup-form');
+        userDashboard = document.getElementById('user-dashboard');
+        loginEmailInput = document.getElementById('login-email');
+        loginPasswordInput = document.getElementById('login-password');
+        emailLoginButton = document.getElementById('email-login-button');
+        googleLoginButton = document.getElementById('google-login-button');
+        signupLink = document.getElementById('signup-link');
+        backToLoginLink = document.getElementById('back-to-login-link');
+        signupEmailInput = document.getElementById('signup-email');
+        signupPasswordInput = document.getElementById('signup-password');
+        confirmPasswordInput = document.getElementById('confirm-password');
+        emailSignupButton = document.getElementById('email-signup-button');
+        logoutButton = document.getElementById('logout-button');
+        goToBhashaLiteButton = document.getElementById('go-to-bhashalite-button');
+        messageBox = document.getElementById('messageBox');
+        userEmailDisplay = document.getElementById('user-email'); // Ensure these are assigned
+        userIdDisplay = document.getElementById('user-id');       // Ensure these are assigned
+
+        // --- Input Label Animation (from original HTML) ---
+        document.querySelectorAll('.inputBox input').forEach(input => {
+            const label = input.nextElementSibling; // Assuming <i> is always next
+            if (label && label.tagName === 'I') { // Check if label exists and is an <i> tag
+                // Initial state for pre-filled inputs
+                if (input.value !== '') {
+                    label.style.transform = 'translateY(-7.5px)';
+                    label.style.fontSize = '0.8em';
+                    label.style.color = '#fff';
+                }
+
+                input.addEventListener('focus', () => {
+                    label.style.transform = 'translateY(-7.5px)';
+                    label.style.fontSize = '0.8em';
+                    label.style.color = '#fff';
+                });
+                input.addEventListener('blur', () => {
+                    if (input.value === '') {
+                        label.style.transform = 'translateY(0)';
+                        label.style.fontSize = '1em';
+                        label.style.color = '#aaa';
+                    }
+                });
+            }
+        });
+
+        // --- Firebase Authentication State Listener ---
+        onAuthStateChanged(auth, async (user) => {
+            hideMessage(); // Clear messages on auth state change
+            if (user) {
+                // User is signed in
+                userDashboard.classList.remove('hidden');
+                loginForm.classList.add('hidden');
+                signupForm.classList.add('hidden');
+
+                userEmailDisplay.textContent = user.email || user.displayName || 'N/A';
+                userIdDisplay.textContent = `User ID: ${user.uid}`; // Display full UID
+
+                // Store user data in Firestore if it's a new user or first login via Google
+                const userDocRef = doc(db, `artifacts/${appId}/users/${user.uid}/profile/details`);
+                const userDocSnap = await getDoc(userDocRef);
+
+                if (!userDocSnap.exists()) {
+                    // New user, save basic profile data
+                    try {
+                        await setDoc(userDocRef, {
+                            uid: user.uid,
+                            email: user.email,
+                            displayName: user.displayName || 'User',
+                            createdAt: new Date().toISOString()
+                        });
+                        showMessage('Welcome! Your profile has been created.', 'success');
+                    } catch (e) {
+                        console.error("Error writing document: ", e);
+                        showMessage('Error saving user profile.', 'error');
+                    }
+                } else {
+                    // Existing user logged in
+                    showMessage('Welcome back!', 'success');
+                }
+
+            } else {
+                // User is signed out
+                userDashboard.classList.add('hidden');
+                loginForm.classList.remove('hidden'); // Show login form by default
+                signupForm.classList.add('hidden'); // Ensure signup is hidden
+                showMessage('Please sign in to continue.', 'info');
+
+                // Sign in anonymously if initial_auth_token is not defined
+                if (typeof __initial_auth_token !== 'undefined') {
+                    try {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } catch (error) {
+                        console.error("Error signing in with custom token:", error);
+                        showMessage("Failed to auto-authenticate. Please log in manually.", "error");
+                    }
+                } else {
+                    try {
+                        await signInAnonymously(auth);
+                        console.log("Signed in anonymously for public data access.");
+                    } catch (error) {
+                        console.error("Error signing in anonymously:", error);
+                        showMessage("Failed to establish anonymous session.", "error");
+                    }
+                }
+            }
+        });
+
+        // --- Event Listeners ---
+        emailLoginButton.addEventListener('click', async (e) => {
+            e.preventDefault();
+            hideMessage();
+            const email = loginEmailInput.value.trim();
+            const password = loginPasswordInput.value.trim();
+
+            if (!email || !password) {
+                showMessage('Please enter both email and password.', 'error');
+                return;
+            }
+
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                // onAuthStateChanged will handle UI update
+            } catch (error) {
+                console.error("Login error:", error.code, error.message);
+                let errorMessage = 'Login failed. Please check your credentials.';
+                if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                    errorMessage = 'Invalid email or password.';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = 'Invalid email format.';
+                }
+                showMessage(errorMessage, 'error');
+            }
+        });
+
+        googleLoginButton.addEventListener('click', async () => {
+            hideMessage();
+            try {
+                await signInWithPopup(auth, googleProvider);
+                // onAuthStateChanged will handle UI update
+            } catch (error) {
+                console.error("Google login error:", error.code, error.message);
+                let errorMessage = 'Google login failed. Please try again.';
+                if (error.code === 'auth/popup-closed-by-user') {
+                    errorMessage = 'Google login window closed.';
+                } else if (error.code === 'auth/cancelled-popup-request') {
+                    errorMessage = 'Another popup is already open or request was cancelled.';
+                }
+                showMessage(errorMessage, 'error');
+            }
+        });
+
+        emailSignupButton.addEventListener('click', async (e) => {
+            e.preventDefault();
+            hideMessage();
+            const email = signupEmailInput.value.trim();
+            const password = signupPasswordInput.value.trim();
+            const confirmPassword = confirmPasswordInput.value.trim();
+
+            if (!email || !password || !confirmPassword) {
+                showMessage('Please fill in all fields.', 'error');
+                return;
+            }
+            if (password.length < 6) {
+                showMessage('Password should be at least 6 characters.', 'error');
+                return;
+            }
+            if (password !== confirmPassword) {
+                showMessage('Passwords do not match.', 'error');
+                return;
+            }
+
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+                // onAuthStateChanged will handle UI update and user data storage
+            } catch (error) {
+                console.error("Signup error:", error.code, error.message);
+                let errorMessage = 'Registration failed. Please try again.';
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMessage = 'This email is already registered.';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = 'Invalid email format.';
+                } else if (error.code === 'auth/weak-password') {
+                    errorMessage = 'Password is too weak. Choose a stronger one.';
+                }
+                showMessage(errorMessage, 'error');
+            }
+        });
+
+        logoutButton.addEventListener('click', async () => {
+            hideMessage();
+            try {
+                await signOut(auth);
+                // onAuthStateChanged will handle UI update
+                showMessage('You have been logged out.', 'info');
+            } catch (error) {
+                console.error("Logout error:", error.message);
+                showMessage('Failed to log out.', 'error');
+            }
+        });
+
+        signupLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginForm.classList.add('hidden');
+            signupForm.classList.remove('hidden');
+            hideMessage();
+        });
+
+        backToLoginLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            signupForm.classList.add('hidden');
+            loginForm.classList.remove('hidden');
+            hideMessage();
+        });
+
+        goToBhashaLiteButton.addEventListener('click', () => {
+            showMessage('Conceptual: Redirecting to BhashaLite App!', 'info');
+            // In a real application, you would redirect to the main BhashaLite app page.
+            // window.location.href = 'bhashalite_main_app.html'; // Example redirect
+        });
+    }); // End of DOMContentLoaded
+</script>
+</body>
+</html>
